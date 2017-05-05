@@ -14,18 +14,18 @@ def concat_years(col_lists):
     '''
 
     dfs = {}
-    for direc in glob.iglob('../data/*'):
-        loc = direc[8:]
+    for direc in glob.iglob('../data/raw/*'):
+        loc = direc[12:]
         new_df = pd.DataFrame(columns=col_lists[loc])
         for f in glob.iglob(direc + '/*.dta'):
             df = pd.read_stata(f)
             df = df[col_lists[loc]]
             df['year'] = int(f[len(f)-8:][:4])
             df['primary_key'] = (df['year'].astype(str) + df['st_case'].astype(str)).astype(int)
-            # if loc == 'accident':
-            #     df.set_index
             new_df = pd.concat([new_df, df])
+        new_df['year'] = new_df['year'].astype(int)
         dfs[loc] = new_df
+
     dfs['accident'].set_index('primary_key', inplace=True)
     return dfs
 
@@ -44,7 +44,7 @@ def explore_cols():
     set_up = {'accident': acc_cols, 'person': per_cols, 'vehicle': veh_cols}
     col_lists = {}
     for category in set_up:
-        for f in glob.iglob('../data/' + category + '/*.dta'):
+        for f in glob.iglob('../data/raw/' + category + '/*.dta'):
             df = pd.read_stata(f)
             for col in df:
                 if col in set_up[category]:
